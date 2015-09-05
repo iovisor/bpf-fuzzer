@@ -12,6 +12,7 @@ http://permalink.gmane.org/gmane.linux.network/376864
 
 ## Directory Overview
 
+```
   - bld
   - config
   - src
@@ -19,6 +20,7 @@ http://permalink.gmane.org/gmane.linux.network/376864
     - test
       - linux-samples-bpf
       - fuzzer
+```
 
 The bld directory is used to build and run test programs.
 The src/helper contains helper files for kernel and 
@@ -32,6 +34,7 @@ A linux source tree is needed. The source tree is used to pre-process kernel fil
 Note that kernel headers will need to be generated at default <kernel_root>/usr/include
 directory. The default config does not have all necessary BPF options enabled,
 you can try to use the one at the config directory.
+
 ```bash
 git clone git://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git
 # apply necessary patch as decribed below
@@ -39,9 +42,11 @@ cd net-next
 make defconfig
 make headers_install
 ```
+
 For above linux tree, apply the following patch so that llvm can cope with linux
 inline assembly:
 
+```
 yhs@ubuntu:~/work/fuzzer/net-next$ git diff
 diff --git a/Makefile b/Makefile
 index c361593..cacbe0f 100644
@@ -57,9 +62,11 @@ index c361593..cacbe0f 100644
  
  # This warning generated too much noise in a regular build.
 yhs@ubuntu:~/work/fuzzer/net-next$ 
+```
 
 A llvm/clang compiler with compiler-rt is needed. The compiler-rt is necessary
 for llvm sanitizer support.
+
 ```bash
 sudo apt-get -y install bison build-essential cmake flex git libedit-dev python zlib1g-dev
 git clone http://llvm.org/git/llvm.git
