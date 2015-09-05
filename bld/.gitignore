@@ -1,0 +1,6 @@
+Fuzzer
+test_verifier
+test_fuzzer
+*.i
+*.o
+*.c
