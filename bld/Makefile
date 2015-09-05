@@ -5,8 +5,14 @@ endif
 BLD=$(PWD)
 SRC=$(PWD)/..
 
-CFLAGS=-O1 -g -fsanitize=address -fsanitize-coverage=edge -fno-omit-frame-pointer
+enable_fuzzer_dataflow=1
+
 FUZZER_CFLAGS=-g -O2 -std=c++11
+CFLAGS=-O1 -g -fsanitize=address -fsanitize-coverage=edge -fno-omit-frame-pointer -DTEST_WORKAROUND
+ifeq ($(enable_fuzzer_dataflow),1)
+FUZZER_CFLAGS += -fPIC
+CFLAGS += -fPIC -fsanitize-coverage=trace-cmp
+endif
 
 .PHONY:	setup test_hook test_verifier all
 
@@ -21,7 +27,6 @@ setup:
 	
 test_hook: $(KERNEL_TREE_ROOT)/kernel/bpf/verifier.c $(SRC)/src/helper/linux_hook.c $(SRC)/src/helper/test_hook.c
 	cd $(KERNEL_TREE_ROOT); make HOSTCC=clang CC=clang kernel/bpf/verifier.i kernel/bpf/linux_hook.i
-	cd $(BLD)
 	ln -sf $(KERNEL_TREE_ROOT)/kernel/bpf/verifier.i .
 	ln -sf $(KERNEL_TREE_ROOT)/kernel/bpf/linux_hook.i .
 	clang $(CFLAGS) -c -I$(KERNEL_TREE_ROOT)/usr/include \
@@ -41,3 +46,9 @@ test_fuzzer: $(SRC)/src/test/fuzzer/test_fuzzer.c
 		Fuzzer*.o
 
 all: test_hook test_verifier test_fuzzer
+
+clean:
+	/bin/rm -rf *.o test_verifier test_fuzzer
+
+distclean:
+	/bin/rm -rf *.i *.h *.c *.o Fuzzer $(KERNEL_TREE_ROOT)/kernel/bpf/linux_hook.c

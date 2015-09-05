@@ -958,9 +958,13 @@ static int test(void)
 		pass_cnt++;
 		printf("OK\n");
 fail:
+#ifdef TEST_WORKAROUND
+		(void)1;
+#else
 		if (map_fd >= 0)
 			close(map_fd);
 		close(prog_fd);
+#endif
 
 	}
 	printf("Summary: %d PASSED, %d FAILED\n", pass_cnt, err_cnt);

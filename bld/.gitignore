@@ -1,6 +1,7 @@
 Fuzzer
 test_verifier
 test_fuzzer
+*.h
 *.i
 *.o
 *.c

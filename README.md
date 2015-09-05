@@ -13,6 +13,7 @@ http://permalink.gmane.org/gmane.linux.network/376864
 ## Directory Overview
 
   - bld
+  - config
   - src
     - helper
     - test
@@ -29,7 +30,8 @@ src/test/fuzzer contains a hook with llvm fuzzer framework.
 
 A linux source tree is needed. The source tree is used to pre-process kernel files.
 Note that kernel headers will need to be generated at default <kernel_root>/usr/include
-directory.
+directory. The default config does not have all necessary BPF options enabled,
+you can try to use the one at the config directory.
 ```bash
 git clone git://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git
 # apply necessary patch as decribed below
