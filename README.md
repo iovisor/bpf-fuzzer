@@ -85,9 +85,10 @@ export PATH=$PWD/install/bin:$PATH
 ## Build and Run
 
 ```bash
+export KERNEL_TREE_ROOT=<kernel_tree_root>
 cd bld
-make KERNEL_TREE_ROOT=<kernel_tree_root> setup
-make KERNEL_TREE_ROOT=<kernel_tree_root> all
+make setup
+make all
 ```
 
 The "setup" target creates common symbolic links and download
