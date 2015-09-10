@@ -4,10 +4,8 @@
  * Copyright (c) 2015 PLUMgrid, Inc.
  *
  * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
+ * modify it under the terms of version 2 of the GNU General Public
+ * License as published by the Free Software Foundation.
  */
 #include <linux/kernel.h>
 #include <linux/types.h>
