@@ -23,6 +23,7 @@ http://permalink.gmane.org/gmane.linux.network/376864
 ```
 
 The bld directory is used to build and run test programs.
+The config directory holds the recommended linux config file
 The src/helper contains helper files for kernel and 
 user hooks. The src/test/linux-samples-bpf contains 
 related test verifier files from linux/samples/bpf/ and
@@ -33,11 +34,13 @@ src/test/fuzzer contains a hook with llvm fuzzer framework.
 A linux source tree is needed. The source tree is used to pre-process kernel files.
 Note that kernel headers will need to be generated at default <kernel_root>/usr/include
 directory. The default config does not have all necessary BPF options enabled,
-you can try to use the one at the config directory.
+and will make verifier tests fail.
+you can try to use the one at the config directory instead of default
+linux:arch/x86/configs/x86_64_defconfig.
 
 ```bash
 git clone git://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git
-# apply necessary patch as decribed below
+# change defconfig and apply necessary patch as decribed below
 cd net-next
 make defconfig
 make headers_install
@@ -83,8 +86,8 @@ export PATH=$PWD/install/bin:$PATH
 
 ```bash
 cd bld
-make KERNEL_TREE_ROOT=<kernel_root> setup
-make KERNEL_TREE_ROOT=<kernel_root> all
+make KERNEL_TREE_ROOT=<kernel_tree_root> setup
+make KERNEL_TREE_ROOT=<kernel_tree_root> all
 ```
 
 The "setup" target creates common symbolic links and download

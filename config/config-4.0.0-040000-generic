@@ -2,9 +2,6 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/x86_64 4.0.0-040000-generic Kernel Configuration
 #
-# git://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git
-# git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git
-#
 CONFIG_64BIT=y
 CONFIG_X86_64=y
 CONFIG_X86=y
