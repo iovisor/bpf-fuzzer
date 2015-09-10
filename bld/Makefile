@@ -1,5 +1,12 @@
+define WARN_KERNEL_TREE_ROOT
+
+Linux kernel tree root is not configured, use "make KERNEL_TREE_ROOT=<> ...",
+or set KERNEL_TREE_ROOT as environment variable and "make ...".
+
+endef
+
 ifeq ($(KERNEL_TREE_ROOT),)
-  $(error Linux kernel tree root is not configured, use "make KERNEL_TREE_ROOT=<> ...")
+  $(error $(WARN_KERNEL_TREE_ROOT))
 endif
 
 BLD=$(PWD)
