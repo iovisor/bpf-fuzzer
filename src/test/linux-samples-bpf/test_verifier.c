@@ -15,6 +15,9 @@
 #include <string.h>
 #include <linux/filter.h>
 #include <stddef.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 #include "libbpf.h"
 
 #define MAX_INSNS 512
@@ -907,6 +910,33 @@ static int create_map(void)
 	return map_fd;
 }
 
+static int gen_fuzzer_tests(char *test_dir, int plen)
+{
+	char fname[plen + 12], tmp_buf[12];
+	int i, fd, len;
+
+	len = strlen(test_dir);
+	strcpy(fname, test_dir);
+
+	for (i = 0; i < ARRAY_SIZE(tests); i++) {
+		struct bpf_insn *prog = tests[i].insns;
+		int prog_len = probe_filter_length(prog);
+
+		sprintf(tmp_buf, "/init_%d", i);
+		strcpy(&fname[len], tmp_buf);
+
+		fd = open(fname, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR);
+		if (fd == -1) {
+			fprintf(stderr, "open %s error: %s\n", fname, strerror(errno));
+			return 1;
+		}
+		write(fd, prog, prog_len * sizeof(struct bpf_insn));
+		close(fd);
+	}
+
+	return 0;
+}
+
 static int test(void)
 {
 	int prog_fd, i, pass_cnt = 0, err_cnt = 0;
@@ -972,7 +1002,29 @@ fail:
 	return 0;
 }
 
-int main(void)
+static void usage(char *prog)
 {
+	printf("%s [-g fuzzer_corpus_dir]\n", prog);
+}
+
+int main(int argc, char **argv)
+{
+	if (argc > 0) {
+		if (argc == 3 && strcmp(argv[1], "-g") == 0) {
+			/* generate test cases for fuzzer, no need to run the test */
+			int ret;
+			char *test_dir = argv[2];
+			ret = mkdir(test_dir, 0755);
+			if (ret != 0 && errno != EEXIST) {
+				fprintf(stderr, "mkdir error: %s\n", strerror(errno));
+				return 1;
+			}
+			return gen_fuzzer_tests(test_dir, strlen(test_dir));
+		} else {
+			usage(argv[0]);
+			return 1;
+		}
+	}
+
 	return test();
 }

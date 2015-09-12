@@ -720,6 +720,26 @@ int bpf_create_map(enum bpf_map_type map_type, int key_size, int value_size,
 	return cur_fd;
 }
 
+void bpf_free_map(int fd)
+{
+	struct bpf_map_node *c, *p;
+
+	c = p = map_head;
+	while (c != NULL) {
+		if (c->fd == fd) {
+			vfree(c->map);
+			if (c == p)
+				map_head = c->next;
+			else
+				p->next = c->next;
+			vfree(c);
+			break;
+		}
+		p = c;
+		c = c->next;
+	}
+}
+
 void bpf_map_put_k(struct bpf_map *map)
 {
 	return;
