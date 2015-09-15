@@ -94,8 +94,18 @@ make all
 The "setup" target creates common symbolic links and download
 and build llvm fuzzer. It only needs to run once.
 
-The "all" target builds two binaries, test_verifier and test_fuzzer.
-test_verifier is essentially linux/samples/bpf/test_verifier.c with
+The "all" target builds two binaries, `test_verifier` and `test_fuzzer`.
+`test_verifier` is essentially `linux/samples/bpf/test_verifier.c` with
 slight modification to adapt to the new test framework, with
-sanitizer support. test_fuzzer uses llvm fuzzer framework
+sanitizer support. `test_fuzzer` uses llvm fuzzer framework
 for testing.
+
+`test_verifier` can also generate initial test cases for `test_fuzzer`.
+These test cases will make fuzzer more effective in generating relevent
+new test cases.
+```bash
+# generate initial test cases for fuzzer, put them into ./corpus directory
+./test_verifier -g ./corpus
+./test_fuzzer ./corpus
+```
+

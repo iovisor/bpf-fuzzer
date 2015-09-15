@@ -15,7 +15,7 @@ SRC=$(PWD)/..
 enable_fuzzer_dataflow=1
 
 FUZZER_CFLAGS=-g -O2 -std=c++11
-CFLAGS=-O1 -g -fsanitize=address -fsanitize-coverage=edge -fno-omit-frame-pointer -DTEST_WORKAROUND
+CFLAGS=-O1 -g -fsanitize=address -fsanitize-coverage=edge,8bit-counters -fno-omit-frame-pointer -DTEST_WORKAROUND
 ifeq ($(enable_fuzzer_dataflow),1)
 FUZZER_CFLAGS += -fPIC
 CFLAGS += -fPIC -fsanitize-coverage=trace-cmp
@@ -58,4 +58,4 @@ clean:
 	/bin/rm -rf *.o test_verifier test_fuzzer
 
 distclean:
-	/bin/rm -rf *.i *.h *.c *.o Fuzzer $(KERNEL_TREE_ROOT)/kernel/bpf/linux_hook.c
+	/bin/rm -rf test_verifier test_fuzzer *.i *.h *.c *.o Fuzzer $(KERNEL_TREE_ROOT)/kernel/bpf/linux_hook.c
