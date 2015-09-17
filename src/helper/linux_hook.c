@@ -801,6 +801,12 @@ int bpf_prog_load(enum bpf_prog_type prog_type,
         if (err >= 0) {
         	/* run eBPF verifier */
 		err = bpf_check(&prog, &attr);
+
+		/* this is a workaround for userspace verifier.
+		 * in kernel, the env->prog->aux->used_maps will be
+		 * freed when the map itself is freed.
+		 */
+		kfree(prog->aux->used_maps);
 	}
         bpf_prog_free_k(prog);
         return err;
