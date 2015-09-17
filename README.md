@@ -47,7 +47,7 @@ make headers_install
 ```
 
 For above linux tree, apply the following patch so that llvm can cope with linux
-inline assembly:
+inline assembly, and workaround a memory leak reporting issue.
 
 ```
 yhs@ubuntu:~/work/fuzzer/net-next$ git diff
@@ -64,6 +64,25 @@ index c361593..cacbe0f 100644
  else
  
  # This warning generated too much noise in a regular build.
+diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
+index b074b23..af83c6e 100644
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -2186,6 +2186,14 @@ skip_full_check:
+                 * bpf_ld_imm64 instructions
+                 */
+                convert_pseudo_ld_imm64(env);
++
++#if 1
++               /* this is a workaround for userspace verifier.
++                * in kernel, the env->prog->aux->used_maps will be
++                * freed when the map itself is freed.
++                */
++               kfree(env->prog->aux->used_maps);
++#endif
+        }
+
+ free_log_buf:
 yhs@ubuntu:~/work/fuzzer/net-next$ 
 ```
 
@@ -106,6 +125,31 @@ new test cases.
 ```bash
 # generate initial test cases for fuzzer, put them into ./corpus directory
 ./test_verifier -g ./corpus
-./test_fuzzer ./corpus
+./test_fuzzer -max_len=1024 ./corpus
 ```
 
+To report memory leaks, the `test_fuzzer` needs to terminate normally.
+This can be done by limiting the number of runs, e.g.,
+```bash
+./test_fuzzer -max_len=1024 -runs=1000000 ./corpus
+```
+
+The following command can be used to find the number of coverages:
+```bash
+# the actual number of coverages should be the number of lines minus one
+# to account for function declaration.
+objdump -D test_fuzzer | grep '<__sanitizer_cov>' | wc
+```
+
+With this information, you can compare to `test_fuzzer` output to
+see what is the coverage. For example, if the total number of
+edge coverages is 1106, and you have the following from `test_fuzzer`
+output:
+```
+......
+#3466257868	NEW    cov: 884 bits: 3749 units: 936 exec/s: 38408 L: 47
+#3486994800	NEW    cov: 884 bits: 3750 units: 937 exec/s: 38396 L: 64
+#3491234878	NEW    cov: 886 bits: 3752 units: 938 exec/s: 38394 L: 58
+#3495108828	NEW    cov: 886 bits: 3754 units: 939 exec/s: 38391 L: 58
+```
+You will know 886 out of 1106 edges are covered so far.
