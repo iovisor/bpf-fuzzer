@@ -47,7 +47,7 @@ make headers_install
 ```
 
 For above linux tree, apply the following patch so that llvm can cope with linux
-inline assembly, and workaround a memory leak reporting issue.
+inline assembly:
 
 ```
 yhs@ubuntu:~/work/fuzzer/net-next$ git diff
@@ -64,25 +64,6 @@ index c361593..cacbe0f 100644
  else
  
  # This warning generated too much noise in a regular build.
-diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
-index b074b23..af83c6e 100644
---- a/kernel/bpf/verifier.c
-+++ b/kernel/bpf/verifier.c
-@@ -2186,6 +2186,14 @@ skip_full_check:
-                 * bpf_ld_imm64 instructions
-                 */
-                convert_pseudo_ld_imm64(env);
-+
-+#if 1
-+               /* this is a workaround for userspace verifier.
-+                * in kernel, the env->prog->aux->used_maps will be
-+                * freed when the map itself is freed.
-+                */
-+               kfree(env->prog->aux->used_maps);
-+#endif
-        }
-
- free_log_buf:
 yhs@ubuntu:~/work/fuzzer/net-next$ 
 ```
 
