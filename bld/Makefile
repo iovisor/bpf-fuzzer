@@ -29,7 +29,7 @@ setup:
 	# user hook
 	ln -sf $(SRC)/src/helper/test_hook.c .
 	# fuzzer
-	svn co http://llvm.org/svn/llvm-project/llvm/trunk/lib/Fuzzer
+	svn co http://llvm.org/svn/llvm-project/compiler-rt/trunk/lib/fuzzer Fuzzer
 	clang -c $(FUZZER_CFLAGS) Fuzzer/*.cpp -IFuzzer
 	
 test_hook: $(KERNEL_TREE_ROOT)/kernel/bpf/verifier.c $(SRC)/src/helper/linux_hook.c $(SRC)/src/helper/test_hook.c
