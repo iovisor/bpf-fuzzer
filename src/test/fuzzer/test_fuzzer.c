@@ -34,10 +34,12 @@ static int create_map(void)
 }
 
 int LLVMFuzzerTestOneInput(const unsigned char *data, unsigned long size) {
-        struct bpf_insn *prog = data, *prog_c, *insn;
+        struct bpf_insn *prog, *prog_c, *insn;
         int i, prog_len = size / sizeof(struct bpf_insn);
 
 	/* If there are any map instructions, we want to create map now. */
+	prog = malloc(size);
+	memcpy(prog, data, size);
 	insn = prog;
 	for (i = 0; i < prog_len; i++, insn++) {
 		if ((insn[0].code == (BPF_LD | BPF_IMM | BPF_DW)) &&
@@ -48,26 +50,26 @@ int LLVMFuzzerTestOneInput(const unsigned char *data, unsigned long size) {
 	}
 	/* keep a copy of instructions since verifier may modify it */
 	prog_c = malloc(size);
-	memcpy(prog_c, data, size);
+	memcpy(prog_c, prog, size);
 
         (void)bpf_prog_load(BPF_PROG_TYPE_SOCKET_FILTER,
-                            prog, prog_len * sizeof(struct bpf_insn),
+                            prog_c, prog_len * sizeof(struct bpf_insn),
                             "GPL", 0);
-	memcpy(prog, prog_c, size);
+	memcpy(prog_c, prog, size);
         (void)bpf_prog_load(BPF_PROG_TYPE_SCHED_CLS,
-                            prog, prog_len * sizeof(struct bpf_insn),
+                            prog_c, prog_len * sizeof(struct bpf_insn),
                             "GPL", 0);
-	memcpy(prog, prog_c, size);
+	memcpy(prog_c, prog, size);
         (void)bpf_prog_load(BPF_PROG_TYPE_SCHED_ACT,
-                            prog, prog_len * sizeof(struct bpf_insn),
+                            prog_c, prog_len * sizeof(struct bpf_insn),
                             "GPL", 0);
-	memcpy(prog, prog_c, size);
+	memcpy(prog_c, prog, size);
         (void)bpf_prog_load(BPF_PROG_TYPE_KPROBE,
-                            prog, prog_len * sizeof(struct bpf_insn),
+                            prog_c, prog_len * sizeof(struct bpf_insn),
                             "GPL", 0);
 
 	/* remove the created maps */
-	insn = prog_c;
+	insn = prog;
 	for (i = 0; i < prog_len; i++, insn++) {
 		if ((insn[0].code == (BPF_LD | BPF_IMM | BPF_DW)) &&
 		    insn->src_reg == BPF_PSEUDO_MAP_FD) {
@@ -75,5 +77,6 @@ int LLVMFuzzerTestOneInput(const unsigned char *data, unsigned long size) {
 		}
 	}
 	free(prog_c);
+	free(prog);
 	return 0;
 }
