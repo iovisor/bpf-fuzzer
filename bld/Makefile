@@ -16,6 +16,7 @@ enable_fuzzer_dataflow=1
 
 FUZZER_CFLAGS=-g -O2 -std=c++11
 CFLAGS=-O1 -g -fsanitize=address -fsanitize-coverage=edge,8bit-counters -fno-omit-frame-pointer -DTEST_WORKAROUND
+COVERAGE_CFLAGS=-O1 -g -fno-omit-frame-pointer -DTEST_WORKAROUND -fprofile-instr-generate -fcoverage-mapping -fPIC
 ifeq ($(enable_fuzzer_dataflow),1)
 FUZZER_CFLAGS += -fPIC
 CFLAGS += -fPIC -fsanitize-coverage=trace-cmp
@@ -52,10 +53,17 @@ test_fuzzer: $(SRC)/src/test/fuzzer/test_fuzzer.c
 		test_fuzzer.o test_hook.o verifier.o linux_hook.o \
 		Fuzzer*.o
 
-all: test_hook test_verifier test_fuzzer
+test_coverage: $(SRC)/src/test/fuzzer/test_fuzzer.c test_hook
+	ln -sf $(SRC)/src/test/fuzzer/* .
+	clang $(COVERAGE_CFLAGS) -o $@ -I$(KERNEL_TREE_ROOT)/usr/include \
+		test_fuzzer.c test_hook.c verifier.i linux_hook.i \
+		Fuzzer/standalone/StandaloneFuzzTargetMain.c
+
+all: test_hook test_verifier test_fuzzer test_coverage
 
 clean:
-	/bin/rm -rf *.o test_verifier test_fuzzer
+	/bin/rm -rf *.o test_verifier test_fuzzer test_coverage
 
 distclean:
-	/bin/rm -rf test_verifier test_fuzzer *.i *.h *.c *.o Fuzzer $(KERNEL_TREE_ROOT)/kernel/bpf/linux_hook.c
+	/bin/rm -rf test_verifier test_fuzzer test_coverage *.i *.h *.c *.o \
+		Fuzzer $(KERNEL_TREE_ROOT)/kernel/bpf/linux_hook.c
