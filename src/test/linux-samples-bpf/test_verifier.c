@@ -925,7 +925,7 @@ static int gen_fuzzer_tests(char *test_dir, int plen)
 		sprintf(tmp_buf, "/init_%d", i);
 		strcpy(&fname[len], tmp_buf);
 
-		fd = open(fname, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR);
+		fd = open(fname, O_CREAT | O_WRONLY | O_TRUNC, S_IREAD | S_IWUSR);
 		if (fd == -1) {
 			fprintf(stderr, "open %s error: %s\n", fname, strerror(errno));
 			return 1;
