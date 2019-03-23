@@ -33,7 +33,7 @@ static int create_map(void)
         return map_fd;
 }
 
-void LLVMFuzzerTestOneInput(const unsigned char *data, unsigned long size) {
+int LLVMFuzzerTestOneInput(const unsigned char *data, unsigned long size) {
         struct bpf_insn *prog = data, *prog_c, *insn;
         int i, prog_len = size / sizeof(struct bpf_insn);
 
@@ -75,4 +75,5 @@ void LLVMFuzzerTestOneInput(const unsigned char *data, unsigned long size) {
 		}
 	}
 	free(prog_c);
+	return 0;
 }
